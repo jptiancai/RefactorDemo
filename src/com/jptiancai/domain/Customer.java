@@ -26,51 +26,96 @@ public class Customer {
 	 * @return
 	 */
 	public String statement() {
-		double totalAmount = 0;// 总消费金额
+		
 		int frequentRenterPoint = 0;// 	常客积点
 		Enumeration rentals = _rentals.elements();
 		String result = "Rental Record for" + getName() + "\n";
 
 		while (rentals.hasMoreElements()) {// 取得一笔租借记录
-			double thisAmount = 0;
 			Rental each = (Rental) rentals.nextElement();
-
-			//
-			switch (each.getMovie().getPriceCode()) {// 取得影片租借价格
-			case Movie.REGULAR:// 普通片
-				thisAmount += 2;
-				if (each.getDayRented() > 2)
-					thisAmount += (each.getDayRented() - 2) * 1.5;
-				break;
-			case Movie.NEW_RELEASE:// 新片
-				thisAmount += each.getDayRented() * 3;
-				break;
-			case Movie.CHILDRENS:// 儿童
-				thisAmount += 1.5;
-				if (each.getDayRented() > 3)
-					thisAmount += (each.getDayRented() - 3) * 1.5;
-				break;
-			}
-			
-			//增加常客累计点
-			frequentRenterPoint++;
-			if ((each.getMovie().getPriceCode()==Movie.NEW_RELEASE)&&each.getDayRented()>1) {
-				frequentRenterPoint++;
-			}
 			
 			//显示此笔租借记录
 			result+="\t"+each.getMovie().getTitle()+"\t"+
-			String.valueOf(thisAmount)+"\n";
-			thisAmount+=thisAmount;
+			String.valueOf(each.getCharge())+"\n";
 
 		}
 		
 		//结尾打印
-		result +="Amount owed is"+String.valueOf(totalAmount)+"\n";
+		result +="Amount owed is"+String.valueOf(getTotalCharge())+"\n";
 		
-		result +="You earned "+String.valueOf(frequentRenterPoint)+"frequent rent points";
+		result +="You earned "+String.valueOf(getTotalFrequentRenterPoints())+"frequent rent points";
 
 		return result;
 	}
+
+	//计算一笔租片费
+	private double amountFor(Rental aRental) {
+		//getCharge方法参数只是用到了Rental对象，所以这里把它移动Rental对象里面
+		//而这里只是引用而已
+		return aRental.getCharge();
+	}
+	
+	// 总消费金额
+	private double getTotalCharge() {
+		double result = 0;
+		Enumeration rentals = _rentals.elements();
+		while (rentals.hasMoreElements()) {// 取得一笔租借记录
+			Rental each = (Rental) rentals.nextElement();
+			result += each.getCharge();
+		}
+		return result;
+	}
+	
+	//增加常客累计点
+	private int getTotalFrequentRenterPoints(){
+
+        int result = 0;
+
+       Enumeration rentals = _rentals.elements();
+
+       while (rentals.hasMoreElements()) {
+
+           Rental each = (Rental) rentals.nextElement();
+
+           result += each.getFrequentRenterPoints();
+
+       }
+
+       return result;
+
+   }
+	
+	//这样可以直接复用之前的代码，来完成html格式的打印报表了
+	public String htmlStatement(){
+		 Enumeration rentals = _rentals.elements();
+
+	     String result = "<H1>Rentals for <EM>" + getName() + "</EM></ H1><P>\n";
+
+	     while (rentals.hasMoreElements()) {
+
+	         Rental each = (Rental) rentals.nextElement();
+
+	         //show figures for each rental
+
+	         result += each.getMovie().getTitle()+ ": " +
+
+	                       String.valueOf(each.getCharge()) + "<BR>\n";
+
+	     }
+
+	     //add footer lines
+
+	     result +=  "<P>You owe <EM>" + String.valueOf(getTotalCharge()) + "</EM><P>\n";
+
+	     result += "On this rental you earned <EM>" +
+
+	         String.valueOf(getTotalFrequentRenterPoints()) +
+
+	         "</EM> frequent renter points<P>";
+
+	     return result;
+
+	}
+
 
 }
