@@ -14,19 +14,36 @@ public class Movie {
 	public static final int REGULAR = 0;
 	public static final int NEW_RELEASE = 1;
 	
-	private String _title;//名称
+	private String _name;//名称
 	private int _priceCode;//价格（代号）
+	private Price _price;
 	
 	
-	public Movie(String _title, int _priceCode) {
-		super();
-		this._title = _title;
-		this._priceCode = _priceCode;
+	public Movie(String name, int priceCode) {
+		this._name = name;
+		setPriceCode(priceCode);	
+	}
+
+
+	private void setPriceCode(int priceCode) {
+		switch (priceCode) {
+		case REGULAR:
+			_price=new RegularPrice();
+			break;
+		case CHILDRENS:
+			_price=new ChildrensPrice();
+			break;
+		case NEW_RELEASE:
+			_price = new NewReleasePrice();
+			break;
+		default:
+			throw new IllegalArgumentException("Incorrect Price Code");
+		}
 	}
 
 
 	public String getTitle() {
-		return _title;
+		return _name;
 	}
 
 
@@ -40,7 +57,14 @@ public class Movie {
 		this._priceCode = _priceCode;
 	}
 	
-	
+	public double getCharge(int daysRented) {
+		return _price.getCharge(daysRented);
+	}
+
+
+	public int getFrequentRenterPoints(int daysRented) {
+		return _price.getFrequentRenterPoints(daysRented);
+	}
 	
 	
 	
