@@ -19,6 +19,10 @@
 `Tip 5`：
 事不过三，三则重构（Three strikes and you refactor）
 
+`TIP 6`：
+不要过早发布（publish）接口。请修改你的代码拥有权政策，使重构更顺畅
+
+
 
 
 
