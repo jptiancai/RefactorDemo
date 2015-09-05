@@ -1,0 +1,448 @@
+﻿<!doctype html public '-//W3C//DTD HTML 4.0 Transitional //EN'>
+<html>
+<head>
+<title>1.organization method</title>
+<meta charset='UTF-8' />
+<meta name='generator' content='EverEdit' />
+<link href='E:\EverEdit\mode\markdown\default.css' rel='stylesheet'></link>
+<link href='E:\EverEdit\mode\markdown\prettify.css' rel='stylesheet'></link>
+<script type='text/javascript' src='E:\EverEdit\mode\markdown\prettify.js'></script>
+<script type='text/javascript' src='E:\EverEdit\mode\markdown\jquery-1.10.2.min.js'></script>
+<script type='text/javascript' src='E:\EverEdit\mode\markdown\toc.js'></script>
+</head>
+<body>
+<div id='generated-toc'></div>
+<h2>Extract Method提炼函数</h2>
+
+<pre><code> void printOwing() {
+
+      Enumeration e = _orders.elements();
+      double outstanding = 0.0;
+
+      // print banner
+      System.out.println ("**************************");
+      System.out.println ("***** Customer Owes ******");
+      System.out.println ("**************************");
+
+      // calculate outstanding
+      while (e.hasMoreElements()) {
+          Order each = (Order) e.nextElement();
+          outstanding += each.getAmount();
+      }
+
+      //print details
+      System.out.println ("name:" + _name);
+      System.out.println ("amount" + outstanding);
+  }
+</code></pre>
+
+<p>重构后的代码:
+让每个函 数都只返回一个值，所以我会安排多个函数，用以返回多个值</p>
+
+<pre><code> void printOwing() {
+
+      Enumeration e = _orders.elements();
+      double outstanding =  getOutstanding();
+
+      printBanner();
+
+      printDetails(outstanding);
+  }
+
+  //无参数的重构
+  void printBanner() {
+
+      // print banner
+      System.out.println ("**************************");
+      System.out.println ("***** Customer Owes ******");
+      System.out.println ("**************************");
+  }
+
+  //有参数的重构
+  void printDetails (double outstanding) {
+
+      System.out.println ("name:" + _name);
+      System.out.println ("amount" + outstanding);
+  }
+
+   double getOutstanding() {
+
+       Enumeration e = _orders.elements();
+       double result = 0.0;
+       while (e.hasMoreElements()) {
+           Order each = (Order) e.nextElement();
+           result += each.getAmount();
+       }
+       return result;
+   }
+
+
+
+</code></pre>
+
+<h2>Inline Method（将函数内联化）</h2>
+
+<pre><code> int getRating() {
+
+     return (moreThanFiveLateDeliveries()) ? 2 : 1;
+
+ }
+
+ boolean moreThanFiveLateDeliveries() {
+
+     return _numberOfLateDeliveries &gt; 5;
+
+ }</code></pre>
+
+<p>重构后的代码：</p>
+
+<pre><code> int getRating() {
+
+     return (_numberOfLateDeliveries &gt; 5) ? 2 : 1;
+
+ }</code></pre>
+
+<h2>Inline Temp（将临时变量内联化）</h2>
+
+<pre><code>    double basePrice = anOrder.basePrice();
+
+    return (basePrice &gt; 1000)
+</code></pre>
+
+<p>重构后的代码：</p>
+
+<pre><code>    return (anOrder.basePrice() &gt; 1000)
+</code></pre>
+
+<h2>Replace Temp with Query（以查询取代临时变量）</h2>
+
+<pre><code>double getPrice() {
+
+       int basePrice = _quantity * _itemPrice;
+       double discountFactor;
+       if (basePrice &gt; 1000) discountFactor = 0.95;
+       else discountFactor = 0.98;
+       return basePrice * discountFactor;
+   }
+</code></pre>
+
+<p>重构后的代码：
+消除临时变量有利于提炼方法！</p>
+
+<pre><code>double getPrice() {
+       return basePrice() * discountFactor();
+   }
+
+   private int basePrice() {
+      return _quantity * _itemPrice;
+   }
+
+   private double discountFactor(){
+       if (basePrice() &gt; 1000) return 0.95;
+       else return 0.98;
+   }
+
+</code></pre>
+
+<h2>Introduce Explaining Variable（引入解释性变量）</h2>
+
+<ul>
+<li>例子1</li>
+</ul>
+
+<pre><code> if ( (platform.toUpperCase().indexOf("MAC") &gt; -1) &amp;&amp;
+     (browser.toUpperCase().indexOf("IE") &gt; -1) &amp;&amp;
+      wasInitialized() &amp;&amp; resize &gt; 0 ){
+     // do something
+}</code></pre>
+
+<p>很明显比上面好理解多了</p>
+
+<pre><code>   final boolean isMacOs     = platform.toUpperCase().indexOf("MAC") &gt; -1;
+   final boolean isIEBrowser = browser.toUpperCase().indexOf("IE")  &gt; -1;
+   final boolean wasResized  = resize &gt; 0;
+
+   if (isMacOs &amp;&amp; isIEBrowser &amp;&amp; wasInitialized() &amp;&amp; wasResized) {
+       // do something
+   }
+</code></pre>
+
+<ul>
+<li>例子2：</li>
+</ul>
+
+<pre><code> double price() {
+
+   // price is base price - quantity discount + shipping
+   return _quantity * _itemPrice -
+       Math.max(0, _quantity - 500) * _itemPrice * 0.05 +
+       Math.min(_quantity * _itemPrice * 0.1, 100.0);
+   }
+</code></pre>
+
+<ol>
+<li>入解释性变量</li>
+<li>运用提炼方法,这也是最终的方案，<code>许多个临时变量</code>&#8211;><code>小方法</code></li>
+</ol>
+
+<pre><code>
+   double price() {
+
+       // price is base price - quantity discount + shipping
+      final double basePrice = _quantity * _itemPrice;
+      final double quantityDiscount = Math.max(0, _quantity - 500) * _itemPrice * 0.05;
+      final double shipping = Math.min(basePrice * 0.1, 100.0);
+
+       return basePrice -quantityDiscount + shipping;
+   }</code></pre>
+
+<pre><code>    double price() {
+       return basePrice() - quantityDiscount() + shipping();
+   }
+
+   private double quantityDiscount() {
+       return Math.max(0, _quantity - 500) * _itemPrice * 0.05;
+   }
+
+   private double shipping() {
+       return Math.min(basePrice() * 0.1, 100.0);
+   }
+
+   private double basePrice() {
+       return _quantity * _itemPrice;
+   }
+</code></pre>
+
+<h2>Split Temporary Variable（剖解临时变量）</h2>
+
+<p>这里介绍了使用<code>final</code>修饰符的地方，表示该变量只赋值了一次（即我只担当了一个责任，如果需要我负责多个责任，那么请在重新创建个变量负责另一件事）</p>
+
+<pre><code> double getDistanceTravelled (int time) {
+
+     double result;
+     double acc = _primaryForce / _mass;        //译注：第一次赋值处
+     int primaryTime = Math.min(time, _delay);
+     result = 0.5 * acc * primaryTime * primaryTime;
+     int secondaryTime = time - _delay;
+
+     if (secondaryTime &gt; 0) {
+         double primaryVel = acc * _delay;        //以下是第二次赋值处
+       acc = (_primaryForce + _secondaryForce) / _mass;        
+         result +=  primaryVel * secondaryTime + 0.5 * acc * secondaryTime * secondaryTime;
+     }
+     return result;
+ }</code></pre>
+
+<p>重构后的代码：</p>
+
+<pre><code> double getDistanceTravelled (int time) {
+
+     double result;
+     //改为final
+     final double primaryAcc  = _primaryForce / _mass;
+
+     int primaryTime = Math.min(time, _delay);
+     result = 0.5 * primaryAcc * primaryTime * primaryTime;
+     int secondaryTime = time - _delay;
+
+     if (secondaryTime &gt; 0) {
+         double primaryVel = primaryAcc * _delay;        //以下是第二次赋值处
+       final double secondaryAcc  = (_primaryForce + _secondaryForce) / _mass;        
+         result +=  primaryVel * secondaryTime + 0.5 * secondaryAcc  * secondaryTime * secondaryTime;
+     }
+     return result;
+ }</code></pre>
+
+<h2>Remove Assignments to Parameters（移除对参数的赋值动作）</h2>
+
+<p><code>final</code>修饰符另一个在重构中有所体现：方法参数上面，表示不需要对参数赋值</p>
+
+<ul>
+<li>例子1：</li>
+</ul>
+
+<pre><code>   int discount (int inputVal, int quantity, int yearToDate) {
+
+       if (inputVal &gt; 50) inputVal -= 2;
+       if (quantity &gt; 100) inputVal -= 1;
+       if (yearToDate &gt; 10000) inputVal -= 4;
+       return inputVal;
+   }
+</code></pre>
+
+<p>重构后的代码：注意<code>final</code>的用法</p>
+
+<pre><code>   int discount (final int inputVal,final int quantity,final int yearToDate) {
+       int result = inputVal;
+       if (inputVal &gt; 50) result -= 2;
+       if (quantity &gt; 100) result -= 1;
+       if (yearToDate &gt; 10000) result -= 4;
+       return result;
+   }
+
+
+</code></pre>
+
+<p>2.例子二：主要探讨java是按值传递的</p>
+
+<pre><code> class Param {
+
+   public static void main(String[] args) {
+       int x = 5;
+       triple(x);
+       System.out.println ("x after triple: " + x);
+   }
+
+   private static void triple(int arg) {
+       arg = arg * 3;
+       System.out.println ("arg in triple: " + arg);
+   }
+}
+
+//会产生这样的输出：
+
+ arg in triple: 15
+ x after triple: 5
+</code></pre>
+
+<pre><code>class Param {
+
+
+
+   public static void main(String[] args) {
+
+       Date d1 = new Date ("1 Apr 98");
+       nextDateUpdate(d1);
+       System.out.println ("d1 after nextDay: " + d1);
+
+       Date d2 = new Date ("1 Apr 98");
+       nextDateReplace(d2);
+       System.out.println ("d2 after nextDay: " + d2);
+   }
+
+   private static void nextDateUpdate (Date arg) {
+       arg.setDate(arg.getDate() + 1);
+       System.out.println ("arg in nextDay: " + arg);
+   }
+
+   private static void nextDateReplace (Date arg) {
+       arg = new Date (arg.getYear(), arg.getMonth(), arg.getDate() + 1);
+       System.out.println ("arg in nextDay: " + arg);
+   }
+ }
+
+ //产生的输出是：
+
+ arg in nextDay: Thu Apr 02 00:00:00 EST 1998
+ d1 after nextDay: Thu Apr 02 00:00:00 EST 1998
+ arg in nextDay: Thu Apr 02 00:00:00 EST 1998
+ d2 after nextDay: Wed Apr 01 00:00:00 EST 1998
+</code></pre>
+
+<h2>Replace Method with Method Object（以函数对象取代函数）</h2>
+
+<p>类中你的方法， 可以用来提炼一个新的class</p>
+
+<pre><code>  Class Account
+
+   int gamma (int inputVal, int quantity, int yearToDate) {
+       int importantValue1 = (inputVal * quantity) + delta();
+       int importantValue2 = (inputVal * yearToDate) + 100;
+       if ((yearToDate - importantValue1) &gt; 100)
+           importantValue2 -= 20;
+       int importantValue3 = importantValue2 * 7;
+       // and so on.
+       return importantValue3 - 2 * importantValue1;
+   }
+</code></pre>
+
+<p>重构后的代码：</p>
+
+<pre><code>//新创建一个class，名称为Gamma
+ class Gamma...
+
+   private final Account _account;
+   private int inputVal;
+   private int quantity;
+   private int yearToDate;
+   private int importantValue1;
+   private int importantValue2;
+   private int importantValue3;
+
+
+  Gamma (Account source, int inputValArg, int quantityArg, int yearToDateArg) {
+       _account = source;
+       inputVal = inputValArg;
+       quantity = quantityArg;
+       yearToDate = yearToDateArg;
+   }
+
+ int compute () {
+
+       importantValue1 = (inputVal * quantity) + _account.delta();
+       importantValue2 = (inputVal * yearToDate) + 100;
+       importantThing();
+       int importantValue3 = importantValue2 * 7;
+       // and so on.
+       return importantValue3 - 2 * importantValue1;
+   }
+
+ //这是原来的class
+   int gamma (int inputVal, int quantity, int yearToDate) {
+       return new Gamma(this, inputVal, quantity, yearToDate).compute();
+   }
+
+
+
+     void importantThing() {
+      if ((yearToDate - importantValue1) &gt; 100)
+           importantValue2 -= 20;
+  }
+
+
+</code></pre>
+
+<h2>Substitute Algorithm（替换你的算法）</h2>
+
+<p>如果你发现做一件事可以有更清晰的方式，就应该以较清晰的方式取代复杂方式</p>
+
+<pre><code>   String foundPerson(String[] people){
+
+       for (int i = 0; i &lt; people.length; i++) {
+
+           if (people[i].equals ("Don")){
+               return "Don";
+           }
+
+           if (people[i].equals ("John")){
+               return "John";
+           }
+
+           if (people[i].equals ("Kent")){
+               return "Kent";
+           }
+       }
+       return "";
+   }
+   }
+</code></pre>
+
+<p>重构后的代码：比之前更加简洁了</p>
+
+<pre><code>
+   String foundPerson(String[] people){
+       List candidates = Arrays.asList(new String[] {"Don", "John", "Kent"});
+       for (int i=0; i&lt;people.length; i++)
+           if (candidates.contains(people[i]))
+               return people[i];
+       return "";</code></pre>
+<script type='text/javascript'>
+$(document).ready(function(){
+  if($('code').length>0){
+    $('code').parent().addClass('prettyprint linenums');
+    prettyPrint();
+};
+});
+</script>
+</body>
+</html>
