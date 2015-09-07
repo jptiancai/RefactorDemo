@@ -1,14 +1,26 @@
-## Move Method（搬移函数） ##
+﻿<!doctype html public '-//W3C//DTD HTML 4.0 Transitional //EN'>
+<html>
+<head>
+<title>2.move obejct</title>
+<meta charset='UTF-8' />
+<meta name='generator' content='EverEdit' />
+<link href='E:\EverEdit\mode\markdown\default.css' rel='stylesheet'></link>
+<link href='E:\EverEdit\mode\markdown\prettify.css' rel='stylesheet'></link>
+<script type='text/javascript' src='E:\EverEdit\mode\markdown\prettify.js'></script>
+<script type='text/javascript' src='E:\EverEdit\mode\markdown\jquery-1.10.2.min.js'></script>
+<script type='text/javascript' src='E:\EverEdit\mode\markdown\toc.js'></script>
+</head>
+<body>
+<div id='generated-toc'></div>
+<h2>Move Method（搬移函数）</h2>
 
-
-```
-//账户类
+<pre><code>//账户类
 class Account...
 
   double overdraftCharge() {                //译注：透支金计费，它和其他class的关系似乎比较密切。
       if (_type.isPremium()) {
           double result = 10;
-          if (_daysOverdrawn > 7) result += (_daysOverdrawn - 7) * 0.85;
+          if (_daysOverdrawn &gt; 7) result += (_daysOverdrawn - 7) * 0.85;
           return result;
       }
       else return _daysOverdrawn * 1.75;
@@ -16,20 +28,19 @@ class Account...
 
   double bankCharge() {
       double result = 4.5;
-      if (_daysOverdrawn > 0) result += overdraftCharge();
+      if (_daysOverdrawn &gt; 0) result += overdraftCharge();
       return result;
   }
 
   private AccountType _type;
   private int _daysOverdrawn;
-  
-```
-如果有数种账户，分别有自己的「透支金计费规则」，所以需要有`AccountType class`
-重构后的代码：
+</code></pre>
 
-```
-class AccountType...
- 
+<p>如果有数种账户，分别有自己的「透支金计费规则」，所以需要有<code>AccountType class</code>
+重构后的代码：</p>
+
+<pre><code>class AccountType...
+
 
 //此例之中被移函数只取用（指涉〕一个值域`_daysOverdrawn`，
 //所以我只需将这个值域作为参数传给target method就行了。
@@ -40,7 +51,7 @@ class AccountType...
   double overdraftCharge(Account account) {
       if (isPremium()) {
           double result = 10;
-          if (account.getDaysOverdrawn() > 7)
+          if (account.getDaysOverdrawn() &gt; 7)
              result += (account.getDaysOverdrawn() - 7) * 0.85;
           return result;
       }
@@ -58,35 +69,35 @@ class Account...
     double bankCharge() {
 
       double result = 4.5;
-      if (_daysOverdrawn > 0) result += _type.overdraftCharge(_daysOverdrawn);
+      if (_daysOverdrawn &gt; 0) result += _type.overdraftCharge(_daysOverdrawn);
       return result;
   }
 
   private AccountType _type;
-  private int _daysOverdrawn;
-```
+  private int _daysOverdrawn;</code></pre>
 
-## Move Field（搬移值域） ##
+<h2>Move Field（搬移值域）</h2>
 
-- 例子1：
+<ul>
+<li>例子1：</li>
+</ul>
 
-```
-class Account...
+<pre><code>class Account...
 
   private AccountType _type;
   private double _interestRate;
- 
+
   double interestForAmount_days (double amount, int days) {
       return _interestRate * amount * days / 365;
   }
+</code></pre>
 
-```
-重构后的代码：把_interestRate值域移到AccountType类中
-```
-class AccountType...
+<p>重构后的代码：把_interestRate值域移到AccountType类中</p>
+
+<pre><code>class AccountType...
 
   private double _interestRate;
- 
+
   void setInterestRate (double arg) {
       _interestRate = arg;
   }
@@ -102,13 +113,13 @@ class AccountType...
       return _type.getInterestRate() * amount * days / 365;
   }
 
+</code></pre>
 
-```
+<ul>
+<li>例子2：</li>
+</ul>
 
-- 例子2：
-
-```
- class Account...
+<pre><code> class Account...
 
    private AccountType _type;
    private double _interestRate;
@@ -124,31 +135,27 @@ class AccountType...
    private double getInterestRate () {
        return _interestRate;
    }
+</code></pre>
 
-```
-重构后的代码：有很多地方用到`_interestRate`值域的时候，可以使用`_type.`调用
+<p>重构后的代码：有很多地方用到<code>_interestRate</code>值域的时候，可以使用<code>_type.</code>调用</p>
 
-```
-   double interestForAmountAndDays (double amount, int days) {
+<pre><code>   double interestForAmountAndDays (double amount, int days) {
        return getInterestRate() * amount * days / 365;
    }
 
    private void setInterestRate (double arg) {
       _type.setInterestRate(arg);
    }
-   
+
    private double getInterestRate () {
        return _type.getInterestRate();
-   }
-```
+   }</code></pre>
 
+<h2>Extract Class（提炼类）</h2>
 
-## Extract Class（提炼类） ##
+<p>提炼类后的下一步要做的决定是：要不要对客户揭示这个新口class？我可以将Person中「与电 话号码相关」的函数委托（delegating）至TelephoneNumber，从而完全隐藏这个新class；也可以直接将它对用户曝光。我还可以将它暴露给部分用户（位于同一个package中的用户），而不暴露给其他用户</p>
 
-提炼类后的下一步要做的决定是：要不要对客户揭示这个新口class？我可以将Person中「与电 话号码相关」的函数委托（delegating）至TelephoneNumber，从而完全隐藏这个新class；也可以直接将它对用户曝光。我还可以将它暴露给部分用户（位于同一个package中的用户），而不暴露给其他用户
-
-```
- class Person...
+<pre><code> class Person...
 
    public String getName() {
        return _name;
@@ -173,15 +180,15 @@ class AccountType...
    void setOfficeNumber(String arg) {
        _officeNumber = arg;
    }
-   
+
    private String _name;
    private String _officeAreaCode;
    private String _officeNumber;
+</code></pre>
 
-```
-重构后的代码：
-```
- class Person...
+<p>重构后的代码：</p>
+
+<pre><code> class Person...
 
    public String getName() {
        return _name;
@@ -223,119 +230,62 @@ class AccountType...
 
    private String _number;
    private String _areaCode;
- 
-
-
-   
-```
-
-
-## Inline Class（将类内联化） ##
-
-
-```
-class Person...
-
-   public String getName() {
-       return _name;
-   }
-
-   public String getTelephoneNumber(){
-       return _officeTelephone.getTelephoneNumber();
-   }
-
-   TelephoneNumber getOfficeTelephone() {
-       return _officeTelephone;
-   }
-
-   private String _name;
-
-   private TelephoneNumber _officeTelephone = new TelephoneNumber();
-
- 
-
- class TelephoneNumber...
-
-   public String getTelephoneNumber() {
-       return ("(" + _areaCode + ") " + _number);
-   }
-
-   String getAreaCode() {
-       return _areaCode;
-   }
-
-   void setAreaCode(String arg) {
-       _areaCode = arg;
-   }
-
-   String getNumber() {
-       return _number;
-   }
-
-   void setNumber(String arg) {
-       _number = arg;
-   }
-   
-   private String _number;
-   private String _areaCode;
 
 
 
-```
-重构后的代码：
-```
- 
-   
-```
+</code></pre>
 
+<h2>#</h2>
 
-##  ##
+<pre><code></code></pre>
 
+<p>重构后的代码：</p>
 
-```
-  
-```
-重构后的代码：
-```
- 
-   
-```
+<pre><code>
+</code></pre>
 
+<h2>#</h2>
 
-##  ##
+<pre><code></code></pre>
 
+<p>重构后的代码：</p>
 
-```
-  
-```
-重构后的代码：
-```
- 
-   
-```
+<pre><code>
+</code></pre>
 
+<h2>#</h2>
 
-##  ##
+<pre><code></code></pre>
 
+<p>重构后的代码：</p>
 
-```
-  
-```
-重构后的代码：
-```
- 
-   
-```
+<pre><code>
+</code></pre>
 
+<h2>#</h2>
 
-##  ##
+<pre><code></code></pre>
 
+<p>重构后的代码：</p>
 
-```
-  
-```
-重构后的代码：
-```
- 
-   
-```
+<pre><code>
+</code></pre>
+
+<h2>#</h2>
+
+<pre><code></code></pre>
+
+<p>重构后的代码：</p>
+
+<pre><code>
+</code></pre>
+<script type='text/javascript'>
+$(document).ready(function(){
+  if($('code').length>0){
+    $('code').parent().addClass('prettyprint linenums');
+    prettyPrint();
+};
+});
+</script>
+</body>
+</html>
