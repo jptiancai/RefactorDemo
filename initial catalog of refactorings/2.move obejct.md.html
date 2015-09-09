@@ -235,31 +235,165 @@ class Account...
 
 </code></pre>
 
-<h2>#</h2>
+<h2>Inline Class（将类内联化）</h2>
 
-<pre><code></code></pre>
+<p>和extract class方法正好相反，如果一个class不再承担足够 责任、不再有单独存在的理由〔这通常是因为此前的重构动作移走了这个class的 责任）</p>
 
-<p>重构后的代码：</p>
+<pre><code>class Person...
 
-<pre><code>
+   public String getName() {
+       return _name;
+   }
+
+   public String getTelephoneNumber(){
+       return _officeTelephone.getTelephoneNumber();
+   }
+
+   TelephoneNumber getOfficeTelephone() {
+       return _officeTelephone;
+   }
+
+   private String _name;
+
+   private TelephoneNumber _officeTelephone = new TelephoneNumber();
+
+
+
+ class TelephoneNumber...
+
+   public String getTelephoneNumber() {
+       return ("(" + _areaCode + ") " + _number);
+   }
+
+   String getAreaCode() {
+       return _areaCode;
+   }
+
+   void setAreaCode(String arg) {
+       _areaCode = arg;
+   }
+
+   String getNumber() {
+       return _number;
+   }
+
+   void setNumber(String arg) {
+       _number = arg;
+   }
+
+   private String _number;
+   private String _areaCode;
+
+
 </code></pre>
 
-<h2>#</h2>
-
-<pre><code></code></pre>
-
 <p>重构后的代码：</p>
 
-<pre><code>
+<pre><code> class Person...
+
+   String getAreaCode() {
+       return _officeTelephone.getAreaCode();        //译注：请注意其变化
+   }
+
+   void setAreaCode(String arg) {
+       _officeTelephone.setAreaCode(arg);                //译注：请注意其变化
+   }
+
+   String getNumber() {
+       return _officeTelephone.getNumber();        //译注：请注意其变化
+   }
+
+   void setNumber(String arg) {
+       _officeTelephone.setNumber(arg);                //译注：请注意其变化
+   }
 </code></pre>
 
-<h2>#</h2>
+<h2>Hide Delegate（隐藏「委托关系」）</h2>
 
-<pre><code></code></pre>
+<pre><code>  class Person {
+
+   Department _department;
+
+   public Department getDepartment() {
+       return _department;
+   }
+
+   public void setDepartment(Department arg) {
+       _department = arg;
+   }
+ }
+
+
+ class Department {
+
+   private String _chargeCode;
+   private Person _manager;
+
+   public Department (Person manager) {
+       _manager = manager
+   }
+
+   public Person getManager() {
+       return _manager;
+   }
+</code></pre>
+
+<p>重构后的代码：让调用者不知道太多的细节，更利于理解，记忆的少了，错误的就好了，那么使用起来就会更加的轻松了。
+如果客户希望知道某人的经理是谁，他必须先取得Department对象：</p>
+
+<pre><code>  manager = john.getDepartment().getManager();
+
+   public Person getManager() {
+       return _department.getManager();
+   }
+
+//现在，我得修改Person的所有客户，让它们改用新函数：
+
+
+
+ manager = john.getManager();</code></pre>
+
+<h2>Remove Middle Man（移除中间人）</h2>
+
+<pre><code> class Person...
+
+   Department _department;        
+   public Person getManager() {
+       return _department.getManager();
+
+ class Department...
+
+   private Person _manager;
+
+   public Department (Person manager) {
+       _manager = manager;
+   }
+</code></pre>
 
 <p>重构后的代码：</p>
 
-<pre><code>
+<pre><code> //为了找出某人的经理，客户代码可能这样写：
+
+ manager = john.getManager();
+
+//像这样，使用和封装Department都很简单。
+//但如果大量函数都这么做，我就不得不在Person之中安置大量委托行为（delegations）。
+//这就是移除中间人的时候了。 首先在Person建立一个「受托对象（delegate）取得函数」：
+
+
+
+ class Person...
+
+   public Department getDepartment() {
+       return _department;
+   }
+
+
+//然后逐一处理每个委托函数。针对每一个这样的函数，
+//我要找出通过Person使用的函数，并对它进行修改，
+//使它首先获得受托对象（delegate），然后直接使用之：
+
+ manager = john.getDepartment().getManager();
 </code></pre>
 
 <h2>#</h2>
