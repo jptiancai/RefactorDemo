@@ -1,15 +1,25 @@
+﻿<!doctype html public '-//W3C//DTD HTML 4.0 Transitional //EN'>
+<html>
+<head>
+<title>3.organization data</title>
+<meta charset='UTF-8' />
+<meta name='generator' content='EverEdit' />
+<link href='E:\EverEdit\mode\markdown\default.css' rel='stylesheet'></link>
+<link href='E:\EverEdit\mode\markdown\prettify.css' rel='stylesheet'></link>
+<script type='text/javascript' src='E:\EverEdit\mode\markdown\prettify.js'></script>
+<script type='text/javascript' src='E:\EverEdit\mode\markdown\jquery-1.10.2.min.js'></script>
+<script type='text/javascript' src='E:\EverEdit\mode\markdown\toc.js'></script>
+</head>
+<body>
+<div id='generated-toc'></div>
+<h2>Self Encapsulate Field（自封装值域）</h2>
 
-##  Self Encapsulate Field（自封装值域） ##
+<p>如果你想访问superclass中的一个值域，却又想在subclass中将「对这个变量的访问」改为一个计算后的值，这就是最该使用Self Encapsulate Field的时候。「值域自我封装」只是第一步。完成自我封装之后，你可以在subclass中根据自己的需要随意覆写取值/设值函数（getting and setting methods ）。</p>
 
-如果你想访问superclass中的一个值域，却又想在subclass中将「对这个变量的访问」改为一个计算后的值，这就是最该使用Self Encapsulate Field的时候。「值域自我封装」只是第一步。完成自我封装之后，你可以在subclass中根据自己的需要随意覆写取值/设值函数（getting and setting methods ）。
-
-
-
-```
- class IntRange {
+<pre><code> class IntRange {
 
    boolean includes (int arg) {
-       return arg >= getLow() && arg <= getHigh();
+       return arg &gt;= getLow() &amp;&amp; arg &lt;= getHigh();
    }
 
    void grow(int factor) {
@@ -32,12 +42,11 @@
 
    void setHigh(int arg) {
        _high = arg;
-   }
-```
-重构后的代码：
+   }</code></pre>
 
-```
-   IntRange (int low, int high) {
+<p>重构后的代码：</p>
+
+<pre><code>   IntRange (int low, int high) {
        initialize (low, high);
    }
 
@@ -65,13 +74,11 @@
        return Math.min(super.getHigh(), getCap());
    }
   }
+</code></pre>
 
-```
+<h2>Replace Data Value with Object（以对象取代数据值）</h2>
 
-## Replace Data Value with Object（以对象取代数据值） ##
-
-```
-class Order...
+<pre><code>class Order...
 
    public Order (String customer) {
        _customer = customer;
@@ -96,17 +103,16 @@ class Order...
        return result;
    }
 
+</code></pre>
 
-```
-重构后的代码：新建Customer类
+<p>重构后的代码：新建Customer类</p>
 
-```
- class Customer {
+<pre><code> class Customer {
 
    public Customer (String name) {
        _name = name;
    }
-   
+
    public String getName() {
        return _name;
    }
@@ -124,25 +130,22 @@ class Order...
    public String getCustomerName() {
        return _customer.getName();
    }
-   
+
    private Customer _customer;
 
    public void setCustomer(String customerName) {
        _customer = new Customer(customerName);
    }
+</code></pre>
 
-```
+<h2>Change Value to Reference（将实值对象改为引用对象）</h2>
 
-
-## Change Value to Reference（将实值对象改为引用对象） ##
-
-```
- class Customer {
+<pre><code> class Customer {
 
    public Customer (String name) {
        _name = name;
    }
-   
+
    public String getName() {
        return _name;
    }
@@ -160,13 +163,13 @@ class Order...
    public String getCustomerName() {
        return _customer.getName();
    }
-   
+
    private Customer _customer;
 
    public void setCustomer(String customerName) {
        _customer = new Customer(customerName);
    }
-   
+
   private static int numberOfOrdersFor(Collection orders, String customer) {
 
       int result = 0;
@@ -181,12 +184,11 @@ class Order...
   }
 
 
+</code></pre>
 
-```
-重构后的代码：引入factory method 
+<p>重构后的代码：引入factory method </p>
 
-```
- class Order {
+<pre><code> class Order {
 
  public Order (String customer) {
      _customer = Customer.create(customer);
@@ -216,176 +218,131 @@ private static Dictionary _instances = new Hashtable();
    private Customer (String name) {
       _name = name;
    }
+</code></pre>
 
-```
+<h2>#</h2>
 
+<pre><code>
+</code></pre>
 
-##  ##
+<p>重构后的代码：</p>
 
-```
+<pre><code></code></pre>
 
+<h2>#</h2>
 
-```
-重构后的代码：
+<pre><code>
+</code></pre>
 
-```
+<p>重构后的代码：</p>
 
-```
+<pre><code></code></pre>
 
+<h2>#</h2>
 
-##  ##
+<pre><code>
+</code></pre>
 
-```
+<p>重构后的代码：</p>
 
+<pre><code></code></pre>
 
-```
-重构后的代码：
+<h2>#</h2>
 
-```
+<pre><code>
+</code></pre>
 
-```
+<p>重构后的代码：</p>
 
+<pre><code></code></pre>
 
-##  ##
+<h2>#</h2>
 
-```
+<pre><code>
+</code></pre>
 
+<p>重构后的代码：</p>
 
-```
-重构后的代码：
+<pre><code></code></pre>
 
-```
+<h2>#</h2>
 
-```
+<pre><code>
+</code></pre>
 
+<p>重构后的代码：</p>
 
-##  ##
+<pre><code></code></pre>
 
-```
+<h2>#</h2>
 
+<pre><code>
+</code></pre>
 
-```
-重构后的代码：
+<p>重构后的代码：</p>
 
-```
+<pre><code></code></pre>
 
-```
+<h2>#</h2>
 
+<pre><code>
+</code></pre>
 
-##  ##
+<p>重构后的代码：</p>
 
-```
+<pre><code></code></pre>
 
+<h2>#</h2>
 
-```
-重构后的代码：
+<pre><code>
+</code></pre>
 
-```
+<p>重构后的代码：</p>
 
-```
+<pre><code></code></pre>
 
+<h2>#</h2>
 
-##  ##
+<pre><code>
+</code></pre>
 
-```
+<p>重构后的代码：</p>
 
+<pre><code></code></pre>
 
-```
-重构后的代码：
+<h2>#</h2>
 
-```
+<pre><code>
+</code></pre>
 
-```
+<p>重构后的代码：</p>
 
-##  ##
+<pre><code></code></pre>
 
-```
+<h2>#</h2>
 
+<pre><code>
+</code></pre>
 
-```
-重构后的代码：
+<p>重构后的代码：</p>
 
-```
+<pre><code></code></pre>
 
-```
+<h2>#</h2>
 
+<pre><code>
+</code></pre>
 
-##  ##
+<p>重构后的代码：</p>
 
-```
-
-
-```
-重构后的代码：
-
-```
-
-```
-
-
-##  ##
-
-```
-
-
-```
-重构后的代码：
-
-```
-
-```
-
-
-##  ##
-
-```
-
-
-```
-重构后的代码：
-
-```
-
-```
-
-
-##  ##
-
-```
-
-
-```
-重构后的代码：
-
-```
-
-```
-
-
-##  ##
-
-```
-
-
-```
-重构后的代码：
-
-```
-
-```
-
-
-##  ##
-
-```
-
-
-```
-重构后的代码：
-
-```
-
-```
-
-
-
+<pre><code></code></pre>
+<script type='text/javascript'>
+$(document).ready(function(){
+  if($('code').length>0){
+    $('code').parent().addClass('prettyprint linenums');
+    prettyPrint();
+};
+});
+</script>
+</body>
+</html>
