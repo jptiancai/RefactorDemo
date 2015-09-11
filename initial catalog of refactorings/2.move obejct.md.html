@@ -355,6 +355,27 @@ class Account...
 
 <h2>Remove Middle Man（移除中间人）</h2>
 
+<p>这和上面的<code>Hide Delegate</code>正好相反，看你怎么舒服就怎为了找出某人的经理，客户代码可能这样写：</p>
+
+<p>manager = john.getManager();</p>
+
+<p>像这样，使用和封装Department都很简单。但如果大量函数都这么做，我就不得不在Person之中安置大量委托行为（delegations）。这就是移除中间人的时候了。 首先在Person建立一个「受托对象（delegate）取得函数」：</p>
+
+<p>class Person&#8230;</p>
+
+<p>public Department getDepartment() {</p>
+
+<pre><code>   return _department;
+</code></pre>
+
+<p>}</p>
+
+<p>然后逐一处理每个委托函数。针对每一个这样的函数，我要找出通过Person使用的函数，并对它进行修改，使它首先获得受托对象（delegate），然后直接使用之：</p>
+
+<p>manager = john.getDepartment().getManager();</p>
+
+<p>么用</p>
+
 <pre><code> class Person...
 
    Department _department;        
@@ -396,23 +417,66 @@ class Account...
  manager = john.getDepartment().getManager();
 </code></pre>
 
-<h2>#</h2>
+<h2>Introduce Foreign Method（引入外加函数）</h2>
 
-<pre><code></code></pre>
+<p>小型重构，重新命名一个很好理解的小函数</p>
+
+<pre><code>    Date newStart = new Date (previousEnd.getYear(),
+       previousEnd.getMonth(), previousEnd.getDate() + 1);
+</code></pre>
 
 <p>重构后的代码：</p>
 
-<pre><code>
+<pre><code> Date newStart = nextDay(previousEnd);
+
+ private static Date nextDay(Date arg) {
+ // foreign method, should be on date
+     return new Date (arg.getYear(),arg.getMonth(), arg.getDate() + 1);
+ }
+
 </code></pre>
 
-<h2>#</h2>
+<h2>Introduce Local Extension（引入本地扩展）</h2>
 
-<pre><code></code></pre>
+<p>你所使用的server class需要一些额外函数，但你无法修改这个class。</p>
 
-<p>重构后的代码：</p>
+<p>例子都是对java中的Date类进行扩展</p>
 
-<pre><code>
+<ul>
+<li>范例1：使用Subclass（子类）</li>
+</ul>
+
+<pre><code>Class mfDate extends Date {
+
+   public nextDay()...
+   public dayOfYear()...
+
+ public MfDateSub (String dateString) {
+          super (dateString);
+    };
+}
 </code></pre>
+
+<ul>
+<li>范例2: 使用wrapper（外覆类）</li>
+</ul>
+
+<pre><code> class mfDate {
+
+   private Date _original
+   public MfDateWrap (String dateString) {
+
+       _original = new Date(dateString);
+
+   };</code></pre>
+
+<ul>
+<li>两个方法的取舍：</li>
+</ul>
+
+<blockquote>
+  <p>在subclass和wrapper之间做选择时，我通常首选subclass，因为这样的工作量比较少。制作subclass的最大障碍在于，它必须在对象创建期（object-createion time）实施。如果我可以接管对象创建过程，那当然没问题；但如果你想在对象创建之后再使用local extention ；就有问题了。此外，&#8221;subclassing&#8221;还迫使我必须产生一个subclass对象，这种情况下如果有其他对象引用了旧对象，我们就同时有两个对象保存了原数据！如果原数据是不可修改的（immutable），那也没问题，我可以放心进行拷贝；但如果原数据允许被修改，问题就来了，因为这时候闹了双包，一个修改动作无法同时改变两份拷贝。这时候我就必须改用wrapper。但使用wrapper时， 对local extention的修改会波及原物（original），反之亦然。</p>
+</blockquote>
 <script type='text/javascript'>
 $(document).ready(function(){
   if($('code').length>0){
