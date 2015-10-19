@@ -1203,7 +1203,60 @@ class Salesman extends EmployeeType {
 
 <p>重构后的代码：</p>
 
-<pre><code></code></pre>
+<p>观察子类做的事情是很多吗？还是只干了一件事情？</p>
+
+<p>尽管常量函数有其用途，但若subclass 中只有常量函数，实在没有足够的存在价值。 你可以在中设计一个与「常量函数返回值」相应的值域，从而完全去除这样的subclass 。如此一来就可以避免因subclassing 而带来的额外复杂性。</p>
+
+<pre><code> class Person...
+
+   static Person createMale(){
+       return new Male();
+   }
+
+   static Person createFemale() {
+       return new Female();
+   }
+
+
+
+//调用
+ Person kent = new Male();
+
+//改成这样：
+
+  Person kent = Person.createMale();
+
+ class Person...
+
+   private final boolean _isMale;
+   private final char _code;
+
+   protected Person (boolean isMale, char code) {
+       _isMale = isMale;
+       _code = code;
+   }
+
+   static Person createMale(){
+       return new Person(true, 'M');
+   }
+
+   boolean isMale() {
+      return _isMale;
+   }
+
+//两个子类
+ class Male...
+
+   Male() {
+       super (true, 'M');
+   }
+
+ class Female...
+
+   Female() {
+       super (false, 'F');
+   }
+</code></pre>
 <script type='text/javascript'>
 $(document).ready(function(){
   if($('code').length>0){
