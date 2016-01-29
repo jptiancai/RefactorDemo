@@ -14,6 +14,13 @@
 
 --------------
 
+
+##坑
+
+- [解决ArrayList的ConcurrentModificationException](http://arron-li.iteye.com/blog/645008)
+
+---------------------
+
 ## 重构相关的文章
 
 - [编程的智慧-王垠](http://www.yinwang.org/blog-cn/2015/11/21/programming-philosophy/)
